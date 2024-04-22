@@ -3,12 +3,10 @@ class Deck:
             self, row: int,
             column: int,
             is_alive: bool = True,
-            is_hit: bool = False
     ) -> None:
         self.row = row
         self.column = column
         self.is_alive = is_alive
-        self.is_hit = is_hit
 
 
 class Ship:
@@ -31,7 +29,6 @@ class Ship:
         deck = self.get_deck(row, column)
         if deck:
             deck.is_alive = False
-            deck.is_hit = True
             if all(not d.is_alive for d in self.decks):
                 self.is_drowned = True
 
@@ -42,11 +39,10 @@ class Battleship:
         self.ships = ships
         self._validate_field()
 
-        for location in ships:
-            ship = Ship(location[0], location[1])
-            for row in range(location[0][0], location[1][0] + 1):
-                for column in range(location[0][1], location[1][1] + 1):
-                    self.field[(row, column)] = ship
+        for start, end in ships:
+            ship = Ship(start, end)
+            for deck in ship.decks:
+                self.field[(deck.row, deck.column)] = ship
 
     def fire(self, location: tuple) -> str:
         if location not in self.field:
@@ -71,7 +67,7 @@ class Battleship:
                     deck = ship.get_deck(row, col)
                     if deck.is_alive:
                         print("\u25A1", end=" ")
-                    elif deck.is_hit and not ship.is_drowned:
+                    elif not deck.is_alive and not ship.is_drowned:
                         print("*", end=" ")
             print()
 
